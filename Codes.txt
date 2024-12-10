@@ -1,0 +1,755 @@
+-- Abdulaziz Hafiz
+-- ID: 444003143
+-- Group 1
+
+
+-- HR schema here
+CREATE TABLE COUNTRIES 
+    ( 
+     COUNTRY_ID CHAR (2 BYTE)  NOT NULL , 
+     COUNTRY_NAME VARCHAR2 (40 BYTE) , 
+     REGION_ID NUMBER 
+    ) LOGGING 
+;
+
+
+ALTER TABLE COUNTRIES 
+    ADD CONSTRAINT COUNTRY_C_ID_PK PRIMARY KEY ( COUNTRY_ID ) ;
+
+
+CREATE TABLE DEPARTMENTS 
+    ( 
+     DEPARTMENT_ID NUMBER (4)  NOT NULL , 
+     DEPARTMENT_NAME VARCHAR2 (30 BYTE)  NOT NULL , 
+     MANAGER_ID NUMBER (6) , 
+     LOCATION_ID NUMBER (4) 
+    ) LOGGING 
+;
+
+CREATE INDEX DEPT_LOCATION_IX ON DEPARTMENTS 
+    ( 
+     LOCATION_ID ASC 
+    ) 
+    NOLOGGING 
+    NOCOMPRESS 
+    NOPARALLEL 
+;
+
+ALTER TABLE DEPARTMENTS 
+    ADD CONSTRAINT DEPT_ID_PK PRIMARY KEY ( DEPARTMENT_ID ) ;
+
+
+CREATE TABLE EMPLOYEES 
+    ( 
+     EMPLOYEE_ID NUMBER (6)  NOT NULL , 
+     FIRST_NAME VARCHAR2 (20 BYTE) , 
+     LAST_NAME VARCHAR2 (25 BYTE)  NOT NULL , 
+     EMAIL VARCHAR2 (25 BYTE)  NOT NULL , 
+     PHONE_NUMBER VARCHAR2 (20 BYTE) , 
+     HIRE_DATE DATE  NOT NULL , 
+     JOB_ID VARCHAR2 (10 BYTE)  NOT NULL , 
+     SALARY NUMBER (8,2) , 
+     COMMISSION_PCT NUMBER (2,2) , 
+     MANAGER_ID NUMBER (6) , 
+     DEPARTMENT_ID NUMBER (4) 
+    ) LOGGING 
+;
+
+
+
+ALTER TABLE EMPLOYEES 
+    ADD CONSTRAINT EMP_EMP_ID_PK PRIMARY KEY ( EMPLOYEE_ID ) ;
+
+ALTER TABLE EMPLOYEES 
+    ADD CONSTRAINT EMP_EMAIL_UK UNIQUE ( EMAIL ) 
+;
+
+
+CREATE TABLE JOBS 
+    ( 
+     JOB_ID VARCHAR2 (10 BYTE)  NOT NULL , 
+     JOB_TITLE VARCHAR2 (35 BYTE)  NOT NULL , 
+     MIN_SALARY NUMBER (6) , 
+     MAX_SALARY NUMBER (6) 
+    ) LOGGING 
+;
+
+
+
+ALTER TABLE JOBS 
+    ADD CONSTRAINT JOB_ID_PK PRIMARY KEY ( JOB_ID ) ;
+
+
+CREATE TABLE JOB_HISTORY 
+    ( 
+     EMPLOYEE_ID NUMBER (6)  NOT NULL , 
+     START_DATE DATE  NOT NULL , 
+     END_DATE DATE  NOT NULL , 
+     JOB_ID VARCHAR2 (10 BYTE)  NOT NULL , 
+     DEPARTMENT_ID NUMBER (4) 
+    ) LOGGING 
+;
+
+
+
+ALTER TABLE JOB_HISTORY 
+    ADD CONSTRAINT JHIST_DATE_INTERVAL 
+    CHECK (end_date > start_date)
+        INITIALLY IMMEDIATE 
+        ENABLE 
+        VALIDATE 
+;
+
+ALTER TABLE JOB_HISTORY 
+    ADD CONSTRAINT JHIST_EMP_ID_ST_DATE_PK PRIMARY KEY ( EMPLOYEE_ID, START_DATE ) ;
+
+
+CREATE TABLE LOCATIONS 
+    ( 
+     LOCATION_ID NUMBER (4)  NOT NULL , 
+     STREET_ADDRESS VARCHAR2 (40 BYTE) , 
+     POSTAL_CODE VARCHAR2 (12 BYTE) , 
+     CITY VARCHAR2 (30 BYTE)  NOT NULL , 
+     STATE_PROVINCE VARCHAR2 (25 BYTE) , 
+     COUNTRY_ID CHAR (2 BYTE) 
+    ) LOGGING 
+;
+
+
+
+ALTER TABLE LOCATIONS 
+    ADD CONSTRAINT LOC_ID_PK PRIMARY KEY ( LOCATION_ID ) ;
+
+
+CREATE TABLE REGIONS 
+    ( 
+     REGION_ID NUMBER  NOT NULL , 
+     REGION_NAME VARCHAR2 (25 BYTE) 
+    ) LOGGING 
+;
+
+
+ALTER TABLE REGIONS 
+    ADD CONSTRAINT REG_ID_PK PRIMARY KEY ( REGION_ID ) ;
+
+
+
+ALTER TABLE COUNTRIES 
+    ADD CONSTRAINT COUNTR_REG_FK FOREIGN KEY 
+    ( 
+     REGION_ID
+    ) 
+    REFERENCES REGIONS 
+    ( 
+     REGION_ID
+    ) 
+    NOT DEFERRABLE 
+;
+
+
+ALTER TABLE DEPARTMENTS 
+    ADD CONSTRAINT DEPT_LOC_FK FOREIGN KEY 
+    ( 
+     LOCATION_ID
+    ) 
+    REFERENCES LOCATIONS 
+    ( 
+     LOCATION_ID
+    ) 
+    NOT DEFERRABLE 
+;
+
+
+ALTER TABLE DEPARTMENTS 
+    ADD CONSTRAINT DEPT_MGR_FK FOREIGN KEY 
+    ( 
+     MANAGER_ID
+    ) 
+    REFERENCES EMPLOYEES 
+    ( 
+     EMPLOYEE_ID
+    ) 
+    NOT DEFERRABLE 
+;
+
+
+ALTER TABLE EMPLOYEES 
+    ADD CONSTRAINT EMP_DEPT_FK FOREIGN KEY 
+    ( 
+     DEPARTMENT_ID
+    ) 
+    REFERENCES DEPARTMENTS 
+    ( 
+     DEPARTMENT_ID
+    ) 
+    NOT DEFERRABLE 
+;
+
+
+ALTER TABLE EMPLOYEES 
+    ADD CONSTRAINT EMP_JOB_FK FOREIGN KEY 
+    ( 
+     JOB_ID
+    ) 
+    REFERENCES JOBS 
+    ( 
+     JOB_ID
+    ) 
+    NOT DEFERRABLE 
+;
+
+
+ALTER TABLE EMPLOYEES 
+    ADD CONSTRAINT EMP_MANAGER_FK FOREIGN KEY 
+    ( 
+     MANAGER_ID
+    ) 
+    REFERENCES EMPLOYEES 
+    ( 
+     EMPLOYEE_ID
+    ) 
+    NOT DEFERRABLE 
+;
+
+
+ALTER TABLE JOB_HISTORY 
+    ADD CONSTRAINT JHIST_DEPT_FK FOREIGN KEY 
+    ( 
+     DEPARTMENT_ID
+    ) 
+    REFERENCES DEPARTMENTS 
+    ( 
+     DEPARTMENT_ID
+    ) 
+    NOT DEFERRABLE 
+;
+
+
+ALTER TABLE JOB_HISTORY 
+    ADD CONSTRAINT JHIST_EMP_FK FOREIGN KEY 
+    ( 
+     EMPLOYEE_ID
+    ) 
+    REFERENCES EMPLOYEES 
+    ( 
+     EMPLOYEE_ID
+    ) 
+    NOT DEFERRABLE 
+;
+
+
+ALTER TABLE JOB_HISTORY 
+    ADD CONSTRAINT JHIST_JOB_FK FOREIGN KEY 
+    ( 
+     JOB_ID
+    ) 
+    REFERENCES JOBS 
+    ( 
+     JOB_ID
+    ) 
+    NOT DEFERRABLE 
+;
+
+
+ALTER TABLE LOCATIONS 
+    ADD CONSTRAINT LOC_C_ID_FK FOREIGN KEY 
+    ( 
+     COUNTRY_ID
+    ) 
+    REFERENCES COUNTRIES 
+    ( 
+     COUNTRY_ID
+    ) 
+    NOT DEFERRABLE 
+;
+
+-- HR data here: https://drive.google.com/file/d/13ODEMADB51TIV5o55TpTbg4xntEdwRLq/view?usp=drive_link
+
+
+
+
+-- PROJECT CODE STARTS HERE --
+-- Create indexes for performace optimaizaion (joins) for forgein keys in the tables. (بعضها موجود في سكيما اواكل)
+CREATE INDEX IDX_COUNTR_REG ON COUNTRIES (REGION_ID);
+CREATE INDEX IDX_DEPT_LOC ON DEPARTMENTS (LOCATION_ID);
+CREATE INDEX IDX_DEPT_MGR ON DEPARTMENTS (MANAGER_ID);
+CREATE INDEX IDX_EMP_DEPT ON EMPLOYEES (DEPARTMENT_ID);
+CREATE INDEX IDX_EMP_JOB ON EMPLOYEES (JOB_ID);
+CREATE INDEX IDX_EMP_MANAGER ON EMPLOYEES (MANAGER_ID);
+CREATE INDEX IDX_JHIST_DEPT ON JOB_HISTORY (DEPARTMENT_ID);
+CREATE INDEX IDX_JHIST_EMP ON JOB_HISTORY (EMPLOYEE_ID);
+CREATE INDEX IDX_JHIST_JOB ON JOB_HISTORY (JOB_ID);
+CREATE INDEX IDX_LOC_C_ID ON LOCATIONS (COUNTRY_ID);
+
+
+
+-- Display employees hierarchy
+CREATE OR REPLACE PROCEDURE GET_EMPLOYEE_HIERARCHY IS
+CURSOR EMPLOYEE_CURSOR IS
+SELECT EMPLOYEE_ID, MANAGER_ID, LEVEL AS HIERARCHY_LEVEL
+FROM EMPLOYEES
+START WITH MANAGER_ID IS NULL
+CONNECT BY PRIOR EMPLOYEE_ID = MANAGER_ID
+ORDER BY LEVEL;
+BEGIN
+FOR EMPLOYEE_RECORD IN EMPLOYEE_CURSOR LOOP
+DBMS_OUTPUT.PUT_LINE('EMPLOYEE ID: ' || EMPLOYEE_RECORD.EMPLOYEE_ID || ', MANAGER ID: ' || EMPLOYEE_RECORD.MANAGER_ID || ', LEVEL: ' || EMPLOYEE_RECORD.HIERARCHY_LEVEL);
+END LOOP;
+END;
+
+
+
+-- Print employee details (id, name, salary, job, dept, city)
+CREATE OR REPLACE PROCEDURE get_employee_details AS
+CURSOR emp_cursor IS
+WITH dept_location AS (
+SELECT d.DEPARTMENT_ID, d.DEPARTMENT_NAME, l.CITY
+FROM DEPARTMENTS d
+JOIN LOCATIONS l ON d.LOCATION_ID = l.LOCATION_ID
+),
+employee_info AS (
+SELECT e.EMPLOYEE_ID, e.FIRST_NAME, e.LAST_NAME, e.DEPARTMENT_ID, e.JOB_ID, e.SALARY
+FROM EMPLOYEES e
+ORDER BY e.EMPLOYEE_ID
+)
+SELECT ei.EMPLOYEE_ID, ei.FIRST_NAME, ei.LAST_NAME, ei.SALARY, j.JOB_TITLE, dl.DEPARTMENT_NAME, dl.CITY
+FROM employee_info ei
+JOIN dept_location dl ON ei.DEPARTMENT_ID = dl.DEPARTMENT_ID
+JOIN JOBS j ON ei.JOB_ID = j.JOB_ID;
+BEGIN
+FOR emp_rec IN emp_cursor LOOP
+DBMS_OUTPUT.PUT_LINE('Employee ID: ' || emp_rec.EMPLOYEE_ID || ', Name: ' || emp_rec.FIRST_NAME || ' ' || emp_rec.LAST_NAME || ', Job Title: ' || emp_rec.JOB_TITLE || 
+', Department: ' || emp_rec.DEPARTMENT_NAME || ', City: ' || emp_rec.CITY || ', Salary: ' || emp_rec.SALARY);
+END LOOP;
+END;
+
+
+
+-- rank employees by salary in a department 
+CREATE OR REPLACE PROCEDURE get_dept_salary_rank(p_department_id IN NUMBER) AS
+BEGIN
+DBMS_OUTPUT.PUT_LINE('Company Departments:');
+FOR dept_rec IN (SELECT DEPARTMENT_ID, DEPARTMENT_NAME FROM DEPARTMENTS ORDER BY DEPARTMENT_ID) 
+LOOP
+DBMS_OUTPUT.PUT_LINE('Department ID: ' || dept_rec.DEPARTMENT_ID || ', Department Name: ' || dept_rec.DEPARTMENT_NAME);
+END LOOP;
+DBMS_OUTPUT.PUT_LINE('---------------------------------');
+DBMS_OUTPUT.PUT_LINE('---------------------------------');
+DBMS_OUTPUT.PUT_LINE('Employee Info for Department ID: ' || p_department_id);
+FOR emp_rec IN (
+SELECT e.EMPLOYEE_ID, e.FIRST_NAME, e.LAST_NAME, e.SALARY, ROW_NUMBER() OVER (PARTITION BY e.DEPARTMENT_ID ORDER BY e.SALARY DESC) AS emp_rank
+FROM EMPLOYEES e WHERE e.DEPARTMENT_ID = p_department_id ORDER BY e.SALARY DESC ) 
+LOOP
+DBMS_OUTPUT.PUT_LINE('ID: ' || emp_rec.EMPLOYEE_ID || ', Name: ' || emp_rec.FIRST_NAME || ' ' || emp_rec.LAST_NAME || ', Salary: ' || emp_rec.SALARY || ', Rank: ' || emp_rec.emp_rank);
+END LOOP;
+END;
+
+
+
+-- View: department location info (city and region)
+CREATE OR REPLACE VIEW dept_location_view AS
+SELECT d.DEPARTMENT_NAME, l.CITY, r.REGION_NAME FROM DEPARTMENTS d
+JOIN LOCATIONS l ON d.LOCATION_ID = l.LOCATION_ID
+JOIN COUNTRIES c ON l.COUNTRY_ID = c.COUNTRY_ID
+JOIN REGIONS r ON c.REGION_ID = r.REGION_ID;
+
+
+
+-- procedure to show the dept location info
+CREATE OR REPLACE PROCEDURE display_department_locations IS
+BEGIN
+FOR rec IN (SELECT * FROM dept_location_view) LOOP
+DBMS_OUTPUT.PUT_LINE('Department: ' || rec.DEPARTMENT_NAME ||  ', City: ' || rec.CITY ||  ', Region: ' || rec.REGION_NAME);
+END LOOP;
+END display_department_locations;
+
+
+-- View: show only employees that are managers (full info)
+CREATE OR REPLACE VIEW managers AS
+SELECT DISTINCT e.EMPLOYEE_ID, e.FIRST_NAME, e.LAST_NAME, e.EMAIL, e.PHONE_NUMBER, e.JOB_ID, e.SALARY, e.HIRE_DATE
+FROM EMPLOYEES e
+WHERE e.EMPLOYEE_ID IN (SELECT DISTINCT MANAGER_ID FROM EMPLOYEES WHERE MANAGER_ID IS NOT NULL)
+ORDER BY e.EMPLOYEE_ID;
+
+
+
+-- procedure to show managers
+CREATE OR REPLACE PROCEDURE display_managers_info IS
+BEGIN
+FOR rec IN (SELECT * FROM managers) LOOP
+DBMS_OUTPUT.PUT_LINE('Manager ID: ' || rec.EMPLOYEE_ID ||  ', Name: ' || rec.FIRST_NAME || ' ' || rec.LAST_NAME ||  ', Job: ' || rec.JOB_ID ||  ', Email: ' || rec.EMAIL);
+END LOOP;
+END display_managers_info;
+
+
+
+
+-- Partition for job history
+CREATE TABLE JOB_HISTORY_PARTITION (
+EMPLOYEE_ID NUMBER(6) NOT NULL,
+START_DATE DATE NOT NULL,
+END_DATE DATE NOT NULL,
+JOB_ID VARCHAR2(10 BYTE) NOT NULL,
+DEPARTMENT_ID NUMBER(4),
+CONSTRAINT JHIST_PART_EMP_ID_ST_DATE_PK PRIMARY KEY (EMPLOYEE_ID, START_DATE),
+CONSTRAINT JHIST_PART_DATE_INTERVAL CHECK (END_DATE > START_DATE),
+CONSTRAINT JHIST_PART_EMP_FK FOREIGN KEY (EMPLOYEE_ID) REFERENCES EMPLOYEES (EMPLOYEE_ID),
+CONSTRAINT JHIST_PART_JOB_FK FOREIGN KEY (JOB_ID) REFERENCES JOBS (JOB_ID),
+CONSTRAINT JHIST_PART_DEPT_FK FOREIGN KEY (DEPARTMENT_ID) REFERENCES DEPARTMENTS (DEPARTMENT_ID)
+)
+PARTITION BY RANGE (START_DATE) (
+PARTITION part_2000_2010 VALUES LESS THAN (TO_DATE('2010-01-01', 'YYYY-MM-DD')),
+PARTITION part_2010_2020 VALUES LESS THAN (TO_DATE('2020-01-01', 'YYYY-MM-DD')),
+PARTITION part_2020_2030 VALUES LESS THAN (TO_DATE('2030-01-01', 'YYYY-MM-DD')),
+PARTITION part_future VALUES LESS THAN (MAXVALUE)
+);
+
+
+
+-- take data from job history to job history partition
+INSERT INTO JOB_HISTORY_PARTITION (EMPLOYEE_ID, START_DATE, END_DATE, JOB_ID, DEPARTMENT_ID)
+SELECT EMPLOYEE_ID, START_DATE, END_DATE, JOB_ID, DEPARTMENT_ID
+FROM JOB_HISTORY;
+
+
+
+-- Object to hold job history record (لا تنسى تحطها في فنكشن)
+CREATE OR REPLACE TYPE job_history_record AS OBJECT (
+EMPLOYEE_ID NUMBER(6),
+START_DATE DATE,
+END_DATE DATE,
+JOB_ID VARCHAR2(10),
+DEPARTMENT_ID NUMBER(4)
+);
+
+CREATE OR REPLACE TYPE job_history_table AS TABLE OF job_history_record;
+
+
+
+-- function to get emp history
+CREATE OR REPLACE FUNCTION GET_EMP_JOB_HISTORY (p_employee_id IN NUMBER)
+RETURN JOB_HISTORY_TABLE
+IS
+job_history JOB_HISTORY_TABLE := JOB_HISTORY_TABLE();
+BEGIN
+FOR RECORD IN (SELECT EMPLOYEE_ID, START_DATE, END_DATE, JOB_ID, DEPARTMENT_ID FROM JOB_HISTORY_PARTITION WHERE EMPLOYEE_ID = p_employee_id ORDER BY START_DATE) 
+LOOP
+job_history.EXTEND;
+job_history(job_history.COUNT) := JOB_HISTORY_RECORD(RECORD.EMPLOYEE_ID,RECORD.START_DATE,RECORD.END_DATE,RECORD.JOB_ID,RECORD.DEPARTMENT_ID);
+END LOOP;
+IF job_history.COUNT = 0 THEN
+DBMS_OUTPUT.PUT_LINE('No history found for Employee ID ' || p_employee_id);
+END IF;
+RETURN job_history;
+EXCEPTION
+WHEN NO_DATA_FOUND THEN
+DBMS_OUTPUT.PUT_LINE('No history found for Employee ID ' || p_employee_id);
+RETURN job_history; 
+WHEN OTHERS THEN
+DBMS_OUTPUT.PUT_LINE('An unexpected error occurred: ' || SQLERRM);
+RETURN job_history; 
+END GET_EMP_JOB_HISTORY;
+
+
+
+
+
+-- procedure to add employee (save it in db)
+CREATE OR REPLACE PROCEDURE add_employee (
+p_employee_id IN NUMBER,
+p_first_name IN VARCHAR2,
+p_last_name IN VARCHAR2,
+p_email IN VARCHAR2,
+p_phone_number IN VARCHAR2,
+p_hire_date IN DATE,
+p_job_id IN VARCHAR2,
+p_salary IN NUMBER,
+p_commission_pct IN NUMBER,
+p_manager_id IN NUMBER,
+p_department_id IN NUMBER
+) IS
+employee_exists EXCEPTION;
+BEGIN
+DECLARE
+v_count NUMBER;
+BEGIN
+SELECT COUNT(*) INTO v_count FROM EMPLOYEES WHERE EMPLOYEE_ID = p_employee_id;
+IF v_count > 0 THEN
+RAISE employee_exists;
+END IF;
+END;
+INSERT INTO EMPLOYEES ( EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, HIRE_DATE, JOB_ID, SALARY, COMMISSION_PCT, MANAGER_ID, DEPARTMENT_ID ) VALUES
+(p_employee_id, p_first_name, p_last_name, p_email, p_phone_number, p_hire_date, p_job_id, p_salary, p_commission_pct, p_manager_id, p_department_id);
+COMMIT;
+EXCEPTION
+WHEN employee_exists THEN
+DBMS_OUTPUT.PUT_LINE('Error: Employee ID ' || p_employee_id || ' is already in use.');
+WHEN OTHERS THEN
+DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+END add_employee;
+
+
+
+--  procedure to delete an employee
+CREATE OR REPLACE PROCEDURE remove_employee (p_employee_id IN NUMBER) IS
+employee_not_found EXCEPTION;
+BEGIN
+DECLARE
+v_count NUMBER;
+BEGIN
+SELECT COUNT(*) INTO v_count FROM EMPLOYEES WHERE EMPLOYEE_ID = p_employee_id;
+IF v_count = 0 THEN
+RAISE employee_not_found;
+END IF;
+END;
+DELETE FROM EMPLOYEES
+WHERE EMPLOYEE_ID = p_employee_id;
+COMMIT;
+EXCEPTION
+WHEN employee_not_found THEN
+DBMS_OUTPUT.PUT_LINE('Error: Employee ID ' || p_employee_id || ' does not exist.');
+WHEN OTHERS THEN
+DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+END remove_employee;
+
+
+
+-- table to store the deleted employees
+CREATE TABLE DELETED_EMPLOYEES (
+EMPLOYEE_ID NUMBER(6),
+FIRST_NAME VARCHAR2(20),
+LAST_NAME VARCHAR2(25),
+EMAIL VARCHAR2(25),
+DEPARTMENT_ID NUMBER(4),
+DELETED_DATE DATE DEFAULT SYSDATE
+);
+
+
+
+
+-- trigger to keep admins (prevent delete in admin dept)
+CREATE OR REPLACE TRIGGER KEEP_ADMINS
+BEFORE DELETE ON EMPLOYEES
+FOR EACH ROW
+DECLARE
+v_department_name VARCHAR2(30);
+BEGIN
+SELECT DEPARTMENT_NAME INTO v_department_name
+FROM DEPARTMENTS
+WHERE DEPARTMENT_ID = :OLD.DEPARTMENT_ID;
+IF v_department_name = 'Administration' THEN
+RAISE_APPLICATION_ERROR(-20001, 'Cannot delete employees in the Administration department.');
+END IF;
+END KEEP_ADMINS;
+
+
+
+-- trigger of logging the deleted employees
+CREATE OR REPLACE TRIGGER log_deleted_employees
+AFTER DELETE ON EMPLOYEES
+FOR EACH ROW
+BEGIN
+INSERT INTO DELETED_EMPLOYEES (
+EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, DEPARTMENT_ID, DELETED_DATE ) VALUES (:OLD.EMPLOYEE_ID,:OLD.FIRST_NAME,:OLD.LAST_NAME,:OLD.EMAIL,:OLD.DEPARTMENT_ID, SYSDATE );
+END log_deleted_employees;
+
+
+
+-- procedure to generate the department-employee report
+CREATE OR REPLACE PROCEDURE generate_department_employee_report IS
+CURSOR dept_cursor IS SELECT DEPARTMENT_ID, DEPARTMENT_NAME FROM DEPARTMENTS;
+v_dept_id DEPARTMENTS.DEPARTMENT_ID%TYPE;
+v_dept_name DEPARTMENTS.DEPARTMENT_NAME%TYPE;
+v_employee_list EMPLOYEE_LIST; 
+BEGIN
+FOR dept_rec IN dept_cursor LOOP
+v_dept_id := dept_rec.DEPARTMENT_ID;
+v_dept_name := dept_rec.DEPARTMENT_NAME;
+SELECT EMPLOYEE_INFO(EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL) BULK COLLECT INTO v_employee_list FROM EMPLOYEES WHERE DEPARTMENT_ID = v_dept_id;
+DBMS_OUTPUT.PUT_LINE('Department: ' || v_dept_name);
+FOR i IN 1..v_employee_list.COUNT 
+LOOP
+DBMS_OUTPUT.PUT_LINE('   Employee ID: ' || v_employee_list(i).EMPLOYEE_ID || ', Name: ' || v_employee_list(i).FIRST_NAME || ' ' || v_employee_list(i).LAST_NAME || ', Email: ' || v_employee_list(i).EMAIL);
+END LOOP;
+DBMS_OUTPUT.PUT_LINE('------------------------------------');
+END LOOP;
+END generate_department_employee_report;
+
+
+
+-- Procedure report of departments and their employees
+CREATE OR REPLACE PROCEDURE department_employee_report IS
+CURSOR dept_cursor IS
+SELECT DEPARTMENT_ID, DEPARTMENT_NAME
+FROM DEPARTMENTS;
+CURSOR emp_cursor (p_department_id NUMBER) IS SELECT EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL FROM EMPLOYEES WHERE DEPARTMENT_ID = p_department_id;
+v_dept_id DEPARTMENTS.DEPARTMENT_ID%TYPE;
+v_dept_name DEPARTMENTS.DEPARTMENT_NAME%TYPE;
+v_employee_id EMPLOYEES.EMPLOYEE_ID%TYPE;
+v_first_name EMPLOYEES.FIRST_NAME%TYPE;
+v_last_name EMPLOYEES.LAST_NAME%TYPE;
+v_email EMPLOYEES.EMAIL%TYPE;
+BEGIN
+FOR dept_rec IN dept_cursor LOOP
+v_dept_id := dept_rec.DEPARTMENT_ID;
+v_dept_name := dept_rec.DEPARTMENT_NAME;
+DBMS_OUTPUT.PUT_LINE('Department: ' || v_dept_name);
+FOR emp_rec IN emp_cursor(v_dept_id) 
+LOOP
+DBMS_OUTPUT.PUT_LINE('   Employee ID: ' || emp_rec.EMPLOYEE_ID || ', Name: ' || emp_rec.FIRST_NAME || ' ' || emp_rec.LAST_NAME || ', Email: ' || emp_rec.EMAIL);
+END LOOP;
+DBMS_OUTPUT.PUT_LINE('------------------------------------');
+END LOOP;
+END department_employee_report;
+
+
+
+-- varray  for phone numbers
+CREATE OR REPLACE TYPE phone_varray AS VARRAY(4) OF VARCHAR2(20);
+
+
+
+-- procedure store multiple phone numbers for selected employees.
+CREATE OR REPLACE PROCEDURE store_employee_phone_numbers(p_employee_id IN NUMBER) IS
+v_first_name EMPLOYEES.FIRST_NAME%TYPE;
+v_last_name EMPLOYEES.LAST_NAME%TYPE;
+v_phone_numbers phone_varray := phone_varray();
+v_phone_number EMPLOYEES.PHONE_NUMBER%TYPE;
+CURSOR phone_cursor IS SELECT PHONE_NUMBER FROM EMPLOYEES WHERE EMPLOYEE_ID = p_employee_id AND PHONE_NUMBER IS NOT NULL;
+BEGIN
+BEGIN SELECT FIRST_NAME, LAST_NAME INTO v_first_name, v_last_name FROM EMPLOYEES WHERE EMPLOYEE_ID = p_employee_id;
+DBMS_OUTPUT.PUT_LINE('Employee ID: ' || p_employee_id || ', Name: ' || v_first_name || ' ' || v_last_name);
+EXCEPTION
+WHEN NO_DATA_FOUND THEN
+DBMS_OUTPUT.PUT_LINE('Error: Employee with ID ' || p_employee_id || ' not found.');
+RETURN;
+END;
+FOR phone_rec IN phone_cursor LOOP
+IF v_phone_numbers.COUNT < 5 THEN
+v_phone_numbers.EXTEND;
+v_phone_numbers(v_phone_numbers.COUNT) := phone_rec.PHONE_NUMBER;
+ELSE
+DBMS_OUTPUT.PUT_LINE('Warning: Only the first 5 phone numbers are stored.');
+EXIT;
+END IF;
+END LOOP;
+IF v_phone_numbers.COUNT > 0 THEN
+FOR i IN 1..v_phone_numbers.COUNT 
+LOOP
+DBMS_OUTPUT.PUT_LINE('   Phone Number: ' || v_phone_numbers(i));
+END LOOP;
+ELSE
+DBMS_OUTPUT.PUT_LINE('No phone numbers found for Employee ID: ' || p_employee_id);
+END IF;
+END store_employee_phone_numbers;
+
+
+
+-- procedure to disaply number of employees above avg salary and belowavg salary in the company
+CREATE OR REPLACE PROCEDURE DISPLAY_EMPS_SALARY_TYPE IS
+AVG_SALARY NUMBER;
+TOTAL_COUNT NUMBER := 0;
+ABOVE_COUNT NUMBER := 0;
+BELOW_COUNT NUMBER := 0;
+BEGIN
+SELECT AVG(SALARY) INTO AVG_SALARY FROM EMPLOYEES;
+FOR EMP IN (SELECT SALARY FROM EMPLOYEES) LOOP
+TOTAL_COUNT := TOTAL_COUNT + 1;
+CASE
+WHEN EMP.SALARY > AVG_SALARY THEN
+ABOVE_COUNT := ABOVE_COUNT + 1;
+WHEN EMP.SALARY < AVG_SALARY THEN
+BELOW_COUNT := BELOW_COUNT + 1;
+END CASE;
+END LOOP;
+DBMS_OUTPUT.PUT_LINE('TOTAL EMPLOYEES: ' || TOTAL_COUNT);
+DBMS_OUTPUT.PUT_LINE('AVERAGE SALARY: ' || AVG_SALARY);
+DBMS_OUTPUT.PUT_LINE('ABOVE AVERAGE SALARY: ' || ABOVE_COUNT);
+DBMS_OUTPUT.PUT_LINE('BELOW AVERAGE SALARY: ' || BELOW_COUNT);
+END DISPLAY_EMPS_SALARY_TYPE;
+
+
+
+
+
+
+-- MAIN MENU 
+
+-- MAIN MENU 
+
+DECLARE
+MAIN_OPERATION NUMBER(2);
+BEGIN
+DBMS_OUTPUT.PUT_LINE('MAIN MENU');
+DBMS_OUTPUT.PUT_LINE('1. Display Employee Hierarchy');
+DBMS_OUTPUT.PUT_LINE('2. Print Employee Details');
+DBMS_OUTPUT.PUT_LINE('3. Rank Employees by Salary in Department');
+DBMS_OUTPUT.PUT_LINE('4. Generate Department Report');
+DBMS_OUTPUT.PUT_LINE('5. View Department Location Info');
+DBMS_OUTPUT.PUT_LINE('6. View Managers');
+DBMS_OUTPUT.PUT_LINE('7. Add Employee');
+DBMS_OUTPUT.PUT_LINE('8. Remove Employee');
+DBMS_OUTPUT.PUT_LINE('9. Store Employee Phone Numbers');
+DBMS_OUTPUT.PUT_LINE('10. Find Employee Job History');
+DBMS_OUTPUT.PUT_LINE('11. Find Number Of Employees Above or Below Avg Salary');
+DBMS_OUTPUT.PUT_LINE('0. Exit');
+DBMS_OUTPUT.PUT_LINE('-------------------------------------');
+
+  MAIN_OPERATION := :MAIN_OPERATION;
+
+IF MAIN_OPERATION = 1 THEN
+GET_EMPLOYEE_HIERARCHY;
+
+ELSIF MAIN_OPERATION = 2 THEN
+get_employee_details;
+
+ELSIF MAIN_OPERATION = 3 THEN
+get_dept_salary_rank(:Salary_Rank_by_Department);
+
+ELSIF MAIN_OPERATION = 4 THEN
+generate_department_employee_report;
+
+ELSIF MAIN_OPERATION = 5 THEN
+DISPLAY_DEPARTMENT_LOCATIONS;
+
+ELSIF MAIN_OPERATION = 6 THEN
+DISPLAY_MANAGERS_INFO;
+
+ELSIF MAIN_OPERATION = 7 THEN
+add_employee(:NEW_EMP_ID, :NEW_FIRST_NAME, :NEW_LAST_NAME, :NEW_EMAIL, :NEW_PHONE_NUMBER, :NEW_HIRE_DATE, :NEW_JOB_ID, :NEW_SALARY, :NEW_COMMISSION_PCT, :NEW_MANAGER_ID, :NEW_DEPARTMENT_ID);
+
+ELSIF MAIN_OPERATION = 8 THEN
+remove_employee(:EMP_ID_TO_REMOVE);
+
+ELSIF MAIN_OPERATION = 9 THEN
+store_employee_phone_numbers(:EMP_ID_TO_ADD_NUMBER, :ADD_PHONE_FOR_PRE_EXIST_EMP);
+
+ELSIF MAIN_OPERATION = 10 THEN
+FOR job_record IN (SELECT /*+ PARALLEL(e 4) */  * FROM TABLE(GET_EMP_JOB_HISTORY(:EMP_ID_TO_FIND_HISTORY))) LOOP
+DBMS_OUTPUT.PUT_LINE('Employee ID: ' || job_record.EMPLOYEE_ID || ', Start Date: ' || job_record.START_DATE || ', End Date: ' || job_record.END_DATE || ', Job ID: ' || job_record.JOB_ID || ', Department ID: ' || job_record.DEPARTMENT_ID);
+END LOOP;
+
+ELSIF MAIN_OPERATION = 11 THEN
+DISPLAY_EMPS_SALARY_TYPE;
+
+ELSIF MAIN_OPERATION = 0 THEN
+DBMS_OUTPUT.PUT_LINE('Exiting...');
+
+ELSE
+DBMS_OUTPUT.PUT_LINE('Invalid choice, please select a valid option (0-9).');
+END IF;
+EXCEPTION
+WHEN VALUE_ERROR THEN
+DBMS_OUTPUT.PUT_LINE('Error: Please enter a valid number for MAIN_OPERATION (0-9).');
+
+WHEN OTHERS THEN
+DBMS_OUTPUT.PUT_LINE('An unexpected error occurred: ' || SQLERRM);
+END;
+
+
+
+
+
+
+
+
